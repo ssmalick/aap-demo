@@ -1,0 +1,34 @@
+---
+version: 3
+
+options:
+  package_manager_path: /usr/bin/microdnf
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--pre'
+
+dependencies:
+  galaxy: requirements.yml
+  python: []
+
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel8:latest
+
+additional_build_files:
+    - src: ./packer
+      dest: configs
+    # - src: ../secrets/aap-demo-415618-8d416d08d099.json
+    #   dest: configs
+
+additional_build_steps:
+  prepend_base:
+    - ADD _build/configs/packer /usr/local/bin/packer
+
+  prepend_final: |
+    RUN whoami
+    RUN cat /etc/os-release
+  append_final:
+    - RUN /usr/local/bin/packer --version
+    - RUN /usr/local/bin/packer plugins install github.com/hashicorp/amazon
+    
